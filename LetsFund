@@ -1,0 +1,57 @@
+//SPDX-License-Identifier: UNLICENSED
+
+pragma solidity >=0.5.0 < 0.9.0;
+
+contract letsfund{
+    mapping(address=>uint) public con;
+    address public manager;
+    uint public minCon; //minimum contri
+    uint public deadline;
+    uint public target;
+    uint public raisedAmount;
+    uint public NOC; 
+
+    struct Request{
+        string des;
+        address payable recipient;
+        uint val;
+        bool completed;
+        uint NOV;
+        mapping(address=>bool) voters;
+    }
+
+    mapping(uint => Request)public request;
+    uint public numRequests;
+    
+
+    constructor(uint _target,uint _deadline)
+    {
+        target=_target;
+        deadline=block.timestamp+ _deadline;
+        minCon=100 wei;
+        manager=msg.sender;
+    }
+
+    function sendEth() public payable
+    {
+        require(block.timestamp <deadline,"Deadline has passed");
+        require(msg.value>=minCon,"Minimum Contribution is not met");
+        if(con[msg.sender]==0)
+        {
+             NOC++;
+        }
+        con[msg.sender]+=msg.value;
+        raisedAmount+=msg.value;
+    }
+    function getContractBalance() public view returns(uint)
+    {
+        return address(this).balance;
+    }
+    function refund()public
+    {
+        require(block.timestamp>deadline && raisedAmount<target,"Abhi toh paisa wapas nhi milega tereko baad me aana");
+        require(con[msg.sender]>0);
+        address payable user= payable(msg.sender);
+        user.transfer(con[msg.sender]);
+        con[msg.sender]=0;         
+    }
